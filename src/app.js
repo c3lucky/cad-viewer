@@ -47,6 +47,7 @@ const pointer = new THREE.Vector2();
 const pickableMeshes = [];
 const originalMaterials = new Map();
 let selectedMesh = null;
+let needsRender = true;
 let partData = {
   catalogByPartNumber: new Map(),
   priceBySku: new Map(),
@@ -58,13 +59,24 @@ init();
 
 async function init() {
   resize();
-  window.addEventListener("resize", resize);
+  window.addEventListener("resize", () => {
+    resize();
+    requestRender();
+  });
   renderer.domElement.addEventListener("pointerdown", handlePick);
-  resetButton.addEventListener("click", frameScene);
+  resetButton.addEventListener("click", () => {
+    frameScene();
+    requestRender();
+  });
 
   partData = await loadPartData();
   await loadModel();
+  controls.addEventListener("change", requestRender);
   animate();
+}
+
+function requestRender() {
+  needsRender = true;
 }
 
 async function loadPartData() {
@@ -114,6 +126,7 @@ async function loadModel() {
     scene.add(model);
     clearMessage();
     frameScene();
+    requestRender();
   } catch (error) {
     console.warn(error);
     showMessage(
@@ -324,7 +337,10 @@ function resize() {
 function animate() {
   requestAnimationFrame(animate);
   controls.update();
+
+  if (!needsRender) return;
   renderer.render(scene, camera);
+  needsRender = false;
 }
 
 function showMessage(text) {

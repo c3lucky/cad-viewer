@@ -37,33 +37,19 @@ body {
   background: #ffffff;
 }
 
-.brand-group {
+..brand-group {
   display: flex;
   min-width: 0;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   white-space: nowrap;
 }
 
 .brand-logo {
-  width: 34px;
-  height: 34px;
-  flex: 0 0 34px;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
   object-fit: contain;
-}
-
-.brand-divider {
-  width: 1px;
-  height: 24px;
-  flex: 0 0 1px;
-  background: #c7d0da;
-}
-
-.brand-section {
-  color: #5d6977;
-  font-size: 13px;
-  font-weight: 750;
-  text-transform: uppercase;
 }
 
 .eyebrow {
