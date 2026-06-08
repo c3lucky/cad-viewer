@@ -1,8 +1,9 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { MeshoptDecoder } from "three/addons/libs/meshopt_decoder.module.js";
 
-const MODEL_URL = "./models/226022-00.optimized.glb";
+const MODEL_URL = "./models/226022-00.optimized.glb?v=20260608-optimized";
 const DATA_ENDPOINTS = {
   catalog: "./mock-api/catalog.json",
   pricing: "./mock-api/pricing.json",
@@ -96,7 +97,9 @@ async function loadModel() {
   showMessage("Loading model...");
 
   try {
-    const gltf = await new GLTFLoader().loadAsync(MODEL_URL);
+    const loader = new GLTFLoader();
+    loader.setMeshoptDecoder(MeshoptDecoder);
+    const gltf = await loader.loadAsync(MODEL_URL);
     const model = gltf.scene;
 
     model.traverse((node) => {
