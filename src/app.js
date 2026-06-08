@@ -19,8 +19,11 @@ scene.background = new THREE.Color(0xf3f6f8);
 const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100000);
 camera.position.set(240, 180, 260);
 
-const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+const renderer = new THREE.WebGLRenderer({
+  antialias: false,
+  powerPreference: "high-performance",
+});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 viewer.appendChild(renderer.domElement);
 
