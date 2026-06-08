@@ -1,0 +1,33 @@
+{
+  "source": "ERP inventory service",
+  "locations": [
+    {
+      "sku": "02-1500017",
+      "stockStatus": "In stock",
+      "availableQuantity": 128,
+      "leadTimeDays": 2,
+      "warehouse": "Main"
+    },
+    {
+      "sku": "14-2600102",
+      "stockStatus": "Build to order",
+      "availableQuantity": 0,
+      "leadTimeDays": 14,
+      "warehouse": "Machine Shop"
+    },
+    {
+      "sku": "12-2300413",
+      "stockStatus": "In stock",
+      "availableQuantity": 23,
+      "leadTimeDays": 3,
+      "warehouse": "Main"
+    },
+    {
+      "sku": "12-1500544",
+      "stockStatus": "Low stock",
+      "availableQuantity": 5,
+      "leadTimeDays": 5,
+      "warehouse": "Main"
+    }
+  ]
+}

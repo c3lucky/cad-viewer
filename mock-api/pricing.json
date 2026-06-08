@@ -1,0 +1,38 @@
+{
+  "source": "ERP pricing service",
+  "currency": "USD",
+  "prices": [
+    {
+      "sku": "02-1500017",
+      "unitPrice": 8.75,
+      "priceBreaks": [
+        { "quantity": 1, "unitPrice": 8.75 },
+        { "quantity": 10, "unitPrice": 7.9 }
+      ]
+    },
+    {
+      "sku": "14-2600102",
+      "unitPrice": 126.4,
+      "priceBreaks": [
+        { "quantity": 1, "unitPrice": 126.4 },
+        { "quantity": 5, "unitPrice": 118.25 }
+      ]
+    },
+    {
+      "sku": "12-2300413",
+      "unitPrice": 48.2,
+      "priceBreaks": [
+        { "quantity": 1, "unitPrice": 48.2 },
+        { "quantity": 10, "unitPrice": 44.5 }
+      ]
+    },
+    {
+      "sku": "12-1500544",
+      "unitPrice": 14.35,
+      "priceBreaks": [
+        { "quantity": 1, "unitPrice": 14.35 },
+        { "quantity": 25, "unitPrice": 12.8 }
+      ]
+    }
+  ]
+}

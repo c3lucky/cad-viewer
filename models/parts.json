@@ -1,0 +1,54 @@
+{
+  "parts": [
+    {
+      "partNumber": "02-1500017_9414T28",
+      "title": "02-1500017_9414T28",
+      "description": "Sample part metadata. Replace with customer-facing detail.",
+      "material": "TBD",
+      "finish": "TBD",
+      "quantity": "TBD",
+      "revision": "TBD",
+      "supplier": "TBD"
+    },
+    {
+      "partNumber": "14-2600102",
+      "title": "14-2600102",
+      "description": "Sample part metadata. Replace with customer-facing detail.",
+      "material": "TBD",
+      "finish": "TBD",
+      "quantity": "TBD",
+      "revision": "TBD",
+      "supplier": "TBD"
+    },
+    {
+      "partNumber": "12-2300413",
+      "title": "12-2300413",
+      "description": "Sample part metadata. Replace with customer-facing detail.",
+      "material": "TBD",
+      "finish": "TBD",
+      "quantity": "TBD",
+      "revision": "TBD",
+      "supplier": "TBD"
+    },
+    {
+      "partNumber": "12-1500544_Default<As Machined>",
+      "title": "12-1500544",
+      "description": "Sample part metadata. Replace with customer-facing detail.",
+      "material": "TBD",
+      "finish": "As machined",
+      "quantity": "TBD",
+      "revision": "TBD",
+      "supplier": "TBD"
+    },
+    {
+      "partNumber": "01-1100015_90",
+      "title": "01-1100015",
+      "description": "Sample part metadata. Replace with customer-facing detail.",
+      "material": "TBD",
+      "finish": "TBD",
+      "quantity": "TBD",
+      "revision": "TBD",
+      "supplier": "TBD"
+    }
+  ]
+}

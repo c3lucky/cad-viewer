@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Interactive CAD Parts Viewer</title>
+    <link rel="stylesheet" href="./src/styles.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.165.0/build/three.module.js",
+          "three/addons/": "https://unpkg.com/three@0.165.0/examples/jsm/"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <main class="app">
+      <header class="toolbar">
+        <div>
+          <p class="eyebrow">Assembly</p>
+          <h1>226022-00</h1>
+        </div>
+        <div class="toolbar-actions">
+          <button id="reset-view" type="button">Reset View</button>
+          <a href="./models/226022-00.glb" download>GLB</a>
+          <a href="./mock-api/catalog.json" download>Mock API</a>
+        </div>
+      </header>
+
+      <section class="workspace">
+        <div id="viewer" class="viewer" aria-label="Interactive 3D CAD viewer"></div>
+        <aside id="drawer" class="drawer" aria-label="Part details">
+          <div class="drawer-empty">
+            <p class="eyebrow">Part Details</p>
+            <h2>Select a part</h2>
+          </div>
+        </aside>
+      </section>
+    </main>
+
+    <script type="module" src="./src/app.js"></script>
+  </body>
+</html>

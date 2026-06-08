@@ -1,0 +1,80 @@
+{
+  "source": "PDM/CAD metadata service",
+  "parts": [
+    {
+      "partNumber": "02-1500017_9414T28",
+      "sku": "02-1500017",
+      "title": "Compression Spring",
+      "description": "Replacement compression spring used in the actuator assembly.",
+      "revision": "B",
+      "material": "Music wire",
+      "finish": "Plain",
+      "quantityInAssembly": 4,
+      "unitOfMeasure": "EA",
+      "orderable": true,
+      "erpItemId": "ERP-02-1500017",
+      "pdmFileId": "PDM-9414T28",
+      "configuration": "Default"
+    },
+    {
+      "partNumber": "14-2600102",
+      "sku": "14-2600102",
+      "title": "Mounting Plate",
+      "description": "Machined plate for locating the pneumatic rail assembly.",
+      "revision": "A",
+      "material": "Aluminum 6061-T6",
+      "finish": "Clear anodized",
+      "quantityInAssembly": 1,
+      "unitOfMeasure": "EA",
+      "orderable": true,
+      "erpItemId": "ERP-14-2600102",
+      "pdmFileId": "PDM-14-2600102",
+      "configuration": "Default"
+    },
+    {
+      "partNumber": "12-2300413",
+      "sku": "12-2300413",
+      "title": "Guide Bracket",
+      "description": "Customer-replaceable guide bracket for the main carriage.",
+      "revision": "C",
+      "material": "Stainless steel 304",
+      "finish": "Passivated",
+      "quantityInAssembly": 2,
+      "unitOfMeasure": "EA",
+      "orderable": true,
+      "erpItemId": "ERP-12-2300413",
+      "pdmFileId": "PDM-12-2300413",
+      "configuration": "Default"
+    },
+    {
+      "partNumber": "12-1500544_Default<As Machined>",
+      "sku": "12-1500544",
+      "title": "Machined Spacer",
+      "description": "Precision spacer used for assembly alignment.",
+      "revision": "A",
+      "material": "Aluminum 6061-T6",
+      "finish": "As machined",
+      "quantityInAssembly": 6,
+      "unitOfMeasure": "EA",
+      "orderable": true,
+      "erpItemId": "ERP-12-1500544",
+      "pdmFileId": "PDM-12-1500544",
+      "configuration": "As Machined"
+    },
+    {
+      "partNumber": "01-1100015_90",
+      "sku": "01-1100015",
+      "title": "Base Frame Weldment",
+      "description": "Main frame weldment. Contact support for service options.",
+      "revision": "D",
+      "material": "Carbon steel",
+      "finish": "Powder coat",
+      "quantityInAssembly": 1,
+      "unitOfMeasure": "EA",
+      "orderable": false,
+      "erpItemId": "ERP-01-1100015",
+      "pdmFileId": "PDM-01-1100015",
+      "configuration": "90 Degree"
+    }
+  ]
+}

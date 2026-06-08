@@ -1,0 +1,16 @@
+{
+  "source": "Future ecommerce/cart API",
+  "endpoint": "/api/cart/items",
+  "method": "POST",
+  "requestExample": {
+    "assemblyId": "226022-00",
+    "partNumber": "14-2600102",
+    "sku": "14-2600102",
+    "quantity": 1
+  },
+  "responseExample": {
+    "cartItemId": "CART-LINE-1001",
+    "status": "added",
+    "checkoutUrl": "https://shop.example.com/cart"
+  }
+}
