@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
-const MODEL_URL = "./models/226022-00.glb";
+const MODEL_URL = "./models/226022-00.optimized.glb";
 const DATA_ENDPOINTS = {
   catalog: "./mock-api/catalog.json",
   pricing: "./mock-api/pricing.json",
@@ -132,10 +132,27 @@ function handlePick(event) {
   pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
   raycaster.setFromCamera(pointer, camera);
-  const hit = raycaster.intersectObjects(pickableMeshes, false)[0];
+  const hit = raycaster.intersectObjects(scene.children, true)[0];
   if (!hit) return;
 
-  selectMesh(hit.object);
+  const mesh = findPickableMesh(hit.object);
+  if (!mesh) return;
+
+  selectMesh(mesh);
+}
+
+function findPickableMesh(object) {
+  while (object && !object.isMesh) {
+    object = object.parent;
+  }
+
+  if (!object || !object.isMesh) return null;
+  if (!pickableMeshes.includes(object)) {
+    pickableMeshes.push(object);
+    object.userData.partNumber = getPartKey(object);
+  }
+
+  return object;
 }
 
 function selectMesh(mesh) {
