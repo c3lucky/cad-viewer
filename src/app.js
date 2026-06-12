@@ -18,15 +18,16 @@ const drawer = document.querySelector("#drawer");
 const resetButton = document.querySelector("#reset-view");
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xf3f6f8);
 
 const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100000);
 camera.position.set(240, 180, 260);
 
 const renderer = new THREE.WebGLRenderer({
+  alpha: true,
   antialias: false,
   powerPreference: "high-performance",
 });
+renderer.setClearColor(0x000000, 0);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 viewer.appendChild(renderer.domElement);
