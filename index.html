@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Interactive CAD Parts Viewer</title>
-    <link rel="stylesheet" href="./src/styles.css?v=20260608-brand-row-2" />
+    <link rel="stylesheet" href="./src/styles.css?v=20260612-iframe-layout" />
     <script type="importmap">
       {
         "imports": {
@@ -16,21 +16,6 @@
   </head>
   <body>
     <main class="app">
-      <header class="toolbar">
-        <div class="brand-group">
-          <img class="brand-logo" src="./c3-logo.png" alt="C3 logo" />
-          <div class="brand-text">
-            <span class="brand-section">Assembly</span>
-            <h1>226022-00</h1>
-          </div>
-        </div>
-        <div class="toolbar-actions">
-          <button id="reset-view" type="button">Reset View</button>
-          <a href="./models/226022-00.optimized.glb" download>Optimized GLB</a>
-          <a href="./mock-api/catalog.json" download>Mock API</a>
-        </div>
-      </header>
-
       <section class="workspace">
         <div id="viewer" class="viewer" aria-label="Interactive 3D CAD viewer"></div>
         <aside id="drawer" class="drawer" aria-label="Part details">
@@ -42,6 +27,6 @@
       </section>
     </main>
 
-    <script type="module" src="./src/app.js?v=20260608-logo-performance-meshopt"></script>
+    <script type="module" src="./src/app.js?v=20260612-iframe-layout"></script>
   </body>
 </html>

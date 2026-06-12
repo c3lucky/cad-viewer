@@ -3,7 +3,10 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { MeshoptDecoder } from "three/addons/libs/meshopt_decoder.module.js";
 
-const MODEL_URL = "./models/226022-00.optimized.glb?v=20260608-optimized";
+const MODEL_URLS = [
+  "./models/226022-00.optimized.glb?v=20260608-optimized",
+  "./models/226022-00.glb?v=20260612-fallback",
+];
 const DATA_ENDPOINTS = {
   catalog: "./mock-api/catalog.json",
   pricing: "./mock-api/pricing.json",
@@ -64,7 +67,7 @@ async function init() {
     requestRender();
   });
   renderer.domElement.addEventListener("pointerdown", handlePick);
-  resetButton.addEventListener("click", () => {
+  resetButton?.addEventListener("click", () => {
     frameScene();
     requestRender();
   });
@@ -109,9 +112,7 @@ async function loadModel() {
   showMessage("Loading model...");
 
   try {
-    const loader = new GLTFLoader();
-    loader.setMeshoptDecoder(MeshoptDecoder);
-    const gltf = await loader.loadAsync(MODEL_URL);
+    const gltf = await loadFirstAvailableModel();
     const model = gltf.scene;
 
     model.traverse((node) => {
@@ -128,11 +129,26 @@ async function loadModel() {
     frameScene();
     requestRender();
   } catch (error) {
-    console.warn(error);
-    showMessage(
-      "Model file not found yet. Convert the STEP assembly to models/226022-00.glb, preserving part names, then reload this page."
-    );
+    console.error("Unable to load the 3D model.", error);
+    showMessage(`Unable to load the 3D model: ${error.message}`);
   }
+}
+
+async function loadFirstAvailableModel() {
+  const errors = [];
+
+  for (const url of MODEL_URLS) {
+    try {
+      const loader = new GLTFLoader();
+      loader.setMeshoptDecoder(MeshoptDecoder);
+      return await loader.loadAsync(url);
+    } catch (error) {
+      errors.push(`${url}: ${error.message}`);
+      console.warn(`Model load failed for ${url}`, error);
+    }
+  }
+
+  throw new Error(errors.join("; "));
 }
 
 function getPartKey(mesh) {
