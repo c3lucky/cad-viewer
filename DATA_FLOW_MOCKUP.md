@@ -8,7 +8,6 @@ call real APIs later.
 
 ```text
 mock-api/catalog.json
-mock-api/pricing.json
 mock-api/inventory.json
 mock-api/order-preview.json
 ```
@@ -19,10 +18,10 @@ mock-api/order-preview.json
 Customer clicks GLB mesh
   -> mesh.name / occurrenceId
   -> PDM/CAD metadata API resolves partNumber + SKU
-  -> ERP pricing API returns current price
   -> ERP inventory API returns stock and lead time
   -> drawer renders customer-facing details
-  -> Add to Quote sends SKU + quantity to ecommerce/cart API
+  -> customer collects parts
+  -> collection request sends SKUs + quantities to quote/order workflow
 ```
 
 ## Integration Contract
@@ -49,32 +48,31 @@ Catalog:
 GET /api/assemblies/226022-00/parts/{meshId}
 ```
 
-Pricing:
-
-```http
-GET /api/pricing/{sku}
-```
-
 Inventory:
 
 ```http
 GET /api/inventory/{sku}
 ```
 
-Cart:
+Quote / Order Request:
 
 ```http
-POST /api/cart/items
+POST /api/part-requests
 ```
 
 Payload:
 
 ```json
 {
+  "requestKind": "quote",
   "assemblyId": "226022-00",
-  "partNumber": "14-2600102",
-  "sku": "14-2600102",
-  "quantity": 1
+  "customerEmail": "customer@example.com",
+  "lines": [
+    {
+      "partNumber": "14-2600102",
+      "sku": "14-2600102",
+      "quantity": 1
+    }
+  ]
 }
 ```
-

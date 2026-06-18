@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Interactive CAD Parts Viewer</title>
-    <link rel="stylesheet" href="./src/styles.css?v=20260612-transparent-viewer" />
+    <link rel="stylesheet" href="./src/styles.css?v=20260618-collection-flow" />
     <script type="importmap">
       {
         "imports": {
@@ -19,14 +19,22 @@
       <section class="workspace">
         <div id="viewer" class="viewer" aria-label="Interactive 3D CAD viewer"></div>
         <aside id="drawer" class="drawer" aria-label="Part details">
-          <div class="drawer-empty">
-            <p class="eyebrow">Part Details</p>
-            <h2>Select a part</h2>
+          <div class="drawer-body drawer-skeleton" aria-hidden="true">
+            <span class="skeleton skeleton-chip"></span>
+            <span class="skeleton skeleton-title"></span>
+            <span class="skeleton skeleton-copy"></span>
+            <span class="skeleton skeleton-copy short"></span>
+            <div class="skeleton-grid">
+              <span class="skeleton skeleton-row"></span>
+              <span class="skeleton skeleton-row"></span>
+              <span class="skeleton skeleton-row"></span>
+              <span class="skeleton skeleton-row"></span>
+            </div>
           </div>
         </aside>
       </section>
     </main>
 
-    <script type="module" src="./src/app.js?v=20260612-transparent-viewer"></script>
+    <script type="module" src="./src/app.js?v=20260618-collection-flow"></script>
   </body>
 </html>

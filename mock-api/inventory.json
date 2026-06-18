@@ -28,6 +28,104 @@
       "availableQuantity": 5,
       "leadTimeDays": 5,
       "warehouse": "Main"
+    },
+    {
+      "sku": "02-1301161",
+      "stockStatus": "In stock",
+      "availableQuantity": 420,
+      "leadTimeDays": 1,
+      "warehouse": "Main"
+    },
+    {
+      "sku": "02-0400188",
+      "stockStatus": "In stock",
+      "availableQuantity": 960,
+      "leadTimeDays": 1,
+      "warehouse": "Main"
+    },
+    {
+      "sku": "02-1900390",
+      "stockStatus": "In stock",
+      "availableQuantity": 76,
+      "leadTimeDays": 2,
+      "warehouse": "Main"
+    },
+    {
+      "sku": "02-2000826",
+      "stockStatus": "In stock",
+      "availableQuantity": 64,
+      "leadTimeDays": 2,
+      "warehouse": "Main"
+    },
+    {
+      "sku": "01-1902147",
+      "stockStatus": "Build to order",
+      "availableQuantity": 0,
+      "leadTimeDays": 12,
+      "warehouse": "Machine Shop"
+    },
+    {
+      "sku": "12-1602868",
+      "stockStatus": "Low stock",
+      "availableQuantity": 8,
+      "leadTimeDays": 6,
+      "warehouse": "Main"
+    },
+    {
+      "sku": "02-1400674",
+      "stockStatus": "In stock",
+      "availableQuantity": 180,
+      "leadTimeDays": 1,
+      "warehouse": "Main"
+    },
+    {
+      "sku": "05-1500006",
+      "stockStatus": "In stock",
+      "availableQuantity": 34,
+      "leadTimeDays": 2,
+      "warehouse": "Main"
+    },
+    {
+      "sku": "01-1900022",
+      "stockStatus": "Build to order",
+      "availableQuantity": 0,
+      "leadTimeDays": 10,
+      "warehouse": "Machine Shop"
+    },
+    {
+      "sku": "01-1902146",
+      "stockStatus": "Low stock",
+      "availableQuantity": 4,
+      "leadTimeDays": 7,
+      "warehouse": "Main"
+    },
+    {
+      "sku": "08-1601061",
+      "stockStatus": "In stock",
+      "availableQuantity": 18,
+      "leadTimeDays": 3,
+      "warehouse": "Main"
+    },
+    {
+      "sku": "12-2300411",
+      "stockStatus": "In stock",
+      "availableQuantity": 22,
+      "leadTimeDays": 3,
+      "warehouse": "Main"
+    },
+    {
+      "sku": "14-2100080",
+      "stockStatus": "Build to order",
+      "availableQuantity": 0,
+      "leadTimeDays": 14,
+      "warehouse": "Machine Shop"
+    },
+    {
+      "sku": "01-1600055",
+      "stockStatus": "In stock",
+      "availableQuantity": 11,
+      "leadTimeDays": 3,
+      "warehouse": "Main"
     }
   ]
 }
