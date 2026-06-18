@@ -1,0 +1,6 @@
+{
+  "source": "Future internal order request API",
+  "endpoint": "/api/order-requests",
+  "status": "submitted",
+  "message": "Order request submitted. Our team will be notified by email when the request is saved for review."
+}

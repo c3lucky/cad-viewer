@@ -11,6 +11,7 @@ const MODEL_URLS = [
 const DATA_ENDPOINTS = {
   catalog: "./mock-api/catalog.json",
   inventory: "./mock-api/inventory.json",
+  orderRequest: "./mock-api/order-request.json",
 };
 
 const viewer = document.querySelector("#viewer");
@@ -408,6 +409,41 @@ function addCollectionItem(catalog, inventory) {
   renderBasketButton();
 }
 
+function removeCollectionItem(key) {
+  const itemIndex = collectionItems.findIndex((item) => item.key === key);
+  if (itemIndex === -1) return;
+
+  const item = collectionItems[itemIndex];
+  if (item.quantity > 1) {
+    item.quantity -= 1;
+    item.updatedAt = new Date().toISOString();
+  } else {
+    collectionItems.splice(itemIndex, 1);
+  }
+
+  renderBasketButton();
+  renderCheckoutPage();
+  if (selectedMesh) renderDrawer(selectedMesh.userData.partNumber);
+}
+
+function updateCollectionQuantity(key, rawQuantity) {
+  const itemIndex = collectionItems.findIndex((item) => item.key === key);
+  if (itemIndex === -1) return;
+
+  const quantity = Math.max(1, Math.floor(Number(rawQuantity) || 1));
+  collectionItems[itemIndex].quantity = quantity;
+  collectionItems[itemIndex].updatedAt = new Date().toISOString();
+  renderBasketButton();
+  updateCollectionTotals();
+  if (selectedMesh) renderDrawer(selectedMesh.userData.partNumber);
+}
+
+function updateCollectionTotals() {
+  const totalPieces = collectionItems.reduce((total, item) => total + item.quantity, 0);
+  const totalPiecesNode = checkoutPage?.querySelector("#total-pieces");
+  if (totalPiecesNode) totalPiecesNode.textContent = String(totalPieces);
+}
+
 function renderBasketButton() {
   if (!basketButton) return;
 
@@ -426,6 +462,7 @@ function syncRoute() {
 
 function renderCheckoutPage() {
   if (!checkoutPage) return;
+  const totalPieces = collectionItems.reduce((total, item) => total + item.quantity, 0);
 
   checkoutPage.innerHTML = `
     <div class="checkout-shell">
@@ -449,7 +486,7 @@ function renderCheckoutPage() {
               </div>
               <div>
                 <span>Total pieces</span>
-                <strong>${escapeHtml(collectionItems.reduce((total, item) => total + item.quantity, 0))}</strong>
+                <strong id="total-pieces">${escapeHtml(totalPieces)}</strong>
               </div>
               <div>
                 <span>Pricing</span>
@@ -461,7 +498,7 @@ function renderCheckoutPage() {
               <div>
                 <p class="eyebrow">Next Step</p>
                 <h2>Request quote or place order</h2>
-                <p>Send the collected parts to the quoting or ordering workflow. Pricing stays off the public viewer.</p>
+                <p>Quote requests can include a customer email. Order requests are submitted internally for database processing.</p>
               </div>
               <label for="customer-email">Customer email</label>
               <div class="quote-email-row">
@@ -488,11 +525,11 @@ function renderCheckoutPage() {
   `;
 
   checkoutPage.querySelector("#request-quote")?.addEventListener("click", () => {
-    submitCollectionRequest("quote");
+    submitQuoteRequest();
   });
 
   checkoutPage.querySelector("#request-order")?.addEventListener("click", () => {
-    submitCollectionRequest("order");
+    submitOrderRequest();
   });
 
   checkoutPage.querySelector("#clear-basket")?.addEventListener("click", () => {
@@ -500,32 +537,107 @@ function renderCheckoutPage() {
     renderBasketButton();
     renderCheckoutPage();
   });
+
+  checkoutPage.querySelectorAll("[data-remove-key]").forEach((button) => {
+    button.addEventListener("click", () => {
+      removeCollectionItem(button.dataset.removeKey);
+    });
+  });
+
+  checkoutPage.querySelectorAll("[data-quantity-key]").forEach((input) => {
+    input.addEventListener("input", () => {
+      updateCollectionQuantity(input.dataset.quantityKey, input.value);
+    });
+    input.addEventListener("change", () => {
+      input.value = String(Math.max(1, Math.floor(Number(input.value) || 1)));
+    });
+  });
 }
 
-function submitCollectionRequest(requestKind) {
+async function submitQuoteRequest() {
   const emailInput = checkoutPage.querySelector("#customer-email");
   const status = checkoutPage.querySelector("#request-status");
+  const button = checkoutPage.querySelector("#request-quote");
   const customerEmail = emailInput?.value.trim();
 
   if (!customerEmail || !emailInput.checkValidity()) {
-    status.textContent = "Enter a valid customer email before submitting the request.";
+    setRequestStatus(status, "Enter a valid customer email before requesting a quote.", "error");
     emailInput?.focus();
     return;
   }
 
-  const payload = createCollectionPayload(requestKind, customerEmail);
-  console.info(`${requestKind} request payload`, payload);
-  status.textContent =
-    requestKind === "quote"
-      ? `Quote request ${payload.requestNumber} submitted for ${customerEmail}.`
-      : `Order request ${payload.requestNumber} submitted for ${customerEmail}.`;
+  const payload = createCollectionPayload("quote", { customerEmail });
+  setRequestLoading(button, true, "Submitting");
+  setRequestStatus(status, "Submitting quote request...", "pending");
+
+  await waitForMockResponse();
+  console.info("quote request payload", payload);
+  setRequestStatus(
+    status,
+    `Quote request ${payload.requestNumber} submitted for ${customerEmail}.`,
+    "success"
+  );
+  setRequestLoading(button, false);
 }
 
-function createCollectionPayload(requestKind, customerEmail) {
+async function submitOrderRequest() {
+  const status = checkoutPage.querySelector("#request-status");
+  const button = checkoutPage.querySelector("#request-order");
+  const payload = createCollectionPayload("order");
+
+  setRequestLoading(button, true, "Submitting");
+  setRequestStatus(status, "Submitting order request...", "pending");
+
+  try {
+    const response = await fetchJson(DATA_ENDPOINTS.orderRequest);
+    console.info("mock order request payload", payload);
+    setRequestStatus(
+      status,
+      response.message ||
+        `Order request ${payload.requestNumber} submitted. Our team will be notified by email.`,
+      "success"
+    );
+  } catch (error) {
+    console.error("Unable to submit mock order request.", error);
+    setRequestStatus(
+      status,
+      "Unable to submit the mock order request. Please try again.",
+      "error"
+    );
+  } finally {
+    setRequestLoading(button, false);
+  }
+}
+
+function setRequestLoading(button, isLoading, label = "Submitting") {
+  if (!button) return;
+  if (!button.dataset.defaultLabel) button.dataset.defaultLabel = button.textContent.trim();
+
+  button.disabled = isLoading;
+  button.classList.toggle("is-loading", isLoading);
+  button.innerHTML = isLoading
+    ? `<span class="button-spinner" aria-hidden="true"></span>${escapeHtml(label)}`
+    : escapeHtml(button.dataset.defaultLabel);
+}
+
+function setRequestStatus(status, message, tone) {
+  if (!status) return;
+  status.classList.remove("success", "error", "pending");
+  status.classList.add(tone);
+  status.textContent = message;
+}
+
+function waitForMockResponse() {
+  return new Promise((resolve) => {
+    window.setTimeout(resolve, 450);
+  });
+}
+
+function createCollectionPayload(requestKind, options = {}) {
   return {
     requestKind,
     assemblyId: "226022-00",
-    customerEmail,
+    ...(options.customerEmail ? { customerEmail: options.customerEmail } : {}),
     requestNumber: createRequestNumber(requestKind),
     lines: collectionItems.map(toCheckoutLine),
   };
@@ -535,12 +647,33 @@ function basketSection(title, items) {
   return `
     <section class="basket-section">
       <header>
-        <h2>${escapeHtml(title)}</h2>
+        <div>
+          <p class="eyebrow">Review</p>
+          <h2>${escapeHtml(title)}</h2>
+        </div>
         <strong>${escapeHtml(items.length)} lines</strong>
       </header>
       ${
         items.length
-          ? items.map(basketItem).join("")
+          ? `
+            <div class="basket-table-wrap">
+              <table class="basket-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Part</th>
+                    <th scope="col">SKU</th>
+                    <th scope="col">Qty</th>
+                    <th scope="col">Lead</th>
+                    <th scope="col">Status</th>
+                    <th scope="col"><span class="sr-only">Remove</span></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${items.map(basketItem).join("")}
+                </tbody>
+              </table>
+            </div>
+          `
           : `<p class="empty-section">No ${escapeHtml(title.toLowerCase())} yet.</p>`
       }
     </section>
@@ -549,27 +682,31 @@ function basketSection(title, items) {
 
 function basketItem(item) {
   return `
-    <article class="basket-item">
-      <div>
-        <span class="part-number">${escapeHtml(item.sku)}</span>
-        <h3>${escapeHtml(item.title)}</h3>
-        <p>${escapeHtml(item.partNumber)}</p>
-      </div>
-      <dl>
-        <div>
-          <dt>Qty</dt>
-          <dd>${escapeHtml(item.quantity)}</dd>
-        </div>
-        <div>
-          <dt>Lead</dt>
-          <dd>${escapeHtml(item.leadTimeDays ? `${item.leadTimeDays} days` : "TBD")}</dd>
-        </div>
-        <div>
-          <dt>Status</dt>
-          <dd>${escapeHtml(item.stockStatus)}</dd>
-        </div>
-      </dl>
-    </article>
+    <tr>
+      <td>
+        <strong>${escapeHtml(item.title)}</strong>
+        <span>${escapeHtml(item.partNumber)}</span>
+      </td>
+      <td><code>${escapeHtml(item.sku)}</code></td>
+      <td>
+        <input
+          class="quantity-input"
+          type="number"
+          min="1"
+          step="1"
+          value="${escapeHtml(item.quantity)}"
+          data-quantity-key="${escapeHtml(item.key)}"
+          aria-label="Quantity for ${escapeHtml(item.title)}"
+        />
+      </td>
+      <td>${escapeHtml(item.leadTimeDays ? `${item.leadTimeDays} days` : "TBD")}</td>
+      <td><span class="table-status">${escapeHtml(item.stockStatus)}</span></td>
+      <td>
+        <button class="remove-line-button" type="button" data-remove-key="${escapeHtml(item.key)}" aria-label="Remove ${escapeHtml(item.title)}">
+          &times;
+        </button>
+      </td>
+    </tr>
   `;
 }
 
