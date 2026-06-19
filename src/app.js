@@ -477,41 +477,47 @@ function renderCheckoutPage() {
       ${
         collectionItems.length
           ? `
-            ${basketSection("Parts To Request", collectionItems)}
+            <div class="checkout-layout">
+              <div class="checkout-main-column">
+                ${basketSection("Parts To Request", collectionItems)}
 
-            <section class="checkout-summary">
-              <div>
-                <span>Unique parts</span>
-                <strong>${escapeHtml(collectionItems.length)}</strong>
+                <section class="checkout-summary">
+                  <div>
+                    <span>Unique parts</span>
+                    <strong>${escapeHtml(collectionItems.length)}</strong>
+                  </div>
+                  <div>
+                    <span>Total pieces</span>
+                    <strong id="total-pieces">${escapeHtml(totalPieces)}</strong>
+                  </div>
+                  <div>
+                    <span>Pricing</span>
+                    <strong>Provided by quote</strong>
+                  </div>
+                </section>
               </div>
-              <div>
-                <span>Total pieces</span>
-                <strong id="total-pieces">${escapeHtml(totalPieces)}</strong>
-              </div>
-              <div>
-                <span>Pricing</span>
-                <strong>Provided by quote</strong>
-              </div>
-            </section>
 
-            <section class="quote-delivery">
-              <div>
-                <p class="eyebrow">Next Step</p>
-                <h2>Request quote or place order</h2>
-                <p>Quote requests can include a customer email. Order requests are submitted internally for database processing.</p>
-              </div>
-              <label for="customer-email">Customer email</label>
-              <div class="quote-email-row">
-                <input id="customer-email" type="email" placeholder="customer@example.com" />
-                <button id="request-quote" class="quote-button" type="button">Request Quote</button>
-                <button id="request-order" class="order-button" type="button">Place Order Request</button>
-              </div>
-              <p id="request-status" class="order-note">Collected parts will be packaged with item details, quantities, availability, and lead times.</p>
-            </section>
+              <aside class="checkout-side-column">
+                <section class="quote-delivery">
+                  <div>
+                    <p class="eyebrow">Next Step</p>
+                    <h2>Request quote or place order</h2>
+                    <p>Quote requests can include a customer email. Order requests are submitted internally for database processing.</p>
+                  </div>
+                  <label for="customer-email">Customer email</label>
+                  <div class="quote-email-row">
+                    <input id="customer-email" type="email" placeholder="customer@example.com" />
+                    <button id="request-quote" class="quote-button" type="button">Request Quote</button>
+                    <button id="request-order" class="order-button" type="button">Place Order Request</button>
+                  </div>
+                  <p id="request-status" class="order-note">Collected parts will be packaged with item details, quantities, availability, and lead times.</p>
+                </section>
 
-            <section class="checkout-actions">
-              <button id="clear-basket" type="button">Clear Collection</button>
-            </section>
+                <section class="checkout-actions">
+                  <button id="clear-basket" type="button">Clear Collection</button>
+                </section>
+              </aside>
+            </div>
           `
           : `
             <section class="empty-basket">

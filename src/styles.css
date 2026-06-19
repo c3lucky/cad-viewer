@@ -750,6 +750,25 @@ button:disabled {
   padding: 10px 0;
 }
 
+.checkout-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 14px;
+  align-items: start;
+}
+
+.checkout-main-column {
+  min-width: 0;
+}
+
+.checkout-side-column {
+  position: sticky;
+  top: 18px;
+  display: grid;
+  gap: 10px;
+  align-self: start;
+}
+
 .checkout-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -955,7 +974,7 @@ button:disabled {
 .quote-delivery {
   display: grid;
   gap: 10px;
-  margin-top: 10px;
+  margin-top: 0;
   padding: 12px;
   border: 1px solid rgba(151, 163, 176, 0.42);
   border-radius: 8px;
@@ -977,7 +996,7 @@ button:disabled {
 
 .quote-email-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(142px, 0.24fr) minmax(180px, 0.31fr);
+  grid-template-columns: 1fr;
   gap: 8px;
 }
 
@@ -991,12 +1010,16 @@ button:disabled {
 }
 
 .checkout-actions {
-  justify-content: flex-start;
-  margin-top: 10px;
+  justify-content: stretch;
+  margin-top: 0;
   padding: 10px 12px;
   border: 1px solid rgba(151, 163, 176, 0.42);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.9);
+}
+
+.checkout-actions button {
+  width: 100%;
 }
 
 .empty-section,
@@ -1037,6 +1060,14 @@ button:disabled {
 
   .checkout-grid {
     grid-template-columns: 1fr;
+  }
+
+  .checkout-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .checkout-side-column {
+    position: static;
   }
 }
 

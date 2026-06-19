@@ -1,7 +1,18 @@
 {
-  "source": "PDM/CAD metadata service",
+  "source": "CAD viewer catalog mesh list mock API",
+  "endpoint": "/api/catalog-viewer/meshes",
+  "assemblyId": "226022-00",
+  "model": {
+    "primaryUrl": "/cad-viewer/models/226022-00_COMP.glb",
+    "fallbackUrl": "/cad-viewer/models/226022-00.glb"
+  },
+  "viewerUrl": "/cad-viewer/",
+  "count": 20,
+  "generatedAt": "2026-06-19T12:34:06.936Z",
   "parts": [
     {
+      "meshId": "02-1500017_9414T28",
+      "occurrenceId": "226022-00:001",
       "partNumber": "02-1500017_9414T28",
       "sku": "02-1500017",
       "title": "Compression Spring",
@@ -14,9 +25,16 @@
       "orderable": true,
       "erpItemId": "ERP-02-1500017",
       "pdmFileId": "PDM-9414T28",
-      "configuration": "Default"
+      "configuration": "Default",
+      "stockStatus": "In stock",
+      "availableQuantity": 128,
+      "leadTimeDays": 2,
+      "warehouse": "Main",
+      "viewerUrl": "/cad-viewer/#mesh=02-1500017_9414T28"
     },
     {
+      "meshId": "14-2600102",
+      "occurrenceId": "226022-00:002",
       "partNumber": "14-2600102",
       "sku": "14-2600102",
       "title": "Mounting Plate",
@@ -29,9 +47,16 @@
       "orderable": true,
       "erpItemId": "ERP-14-2600102",
       "pdmFileId": "PDM-14-2600102",
-      "configuration": "Default"
+      "configuration": "Default",
+      "stockStatus": "Build to order",
+      "availableQuantity": 0,
+      "leadTimeDays": 14,
+      "warehouse": "Machine Shop",
+      "viewerUrl": "/cad-viewer/#mesh=14-2600102"
     },
     {
+      "meshId": "12-2300413",
+      "occurrenceId": "226022-00:003",
       "partNumber": "12-2300413",
       "sku": "12-2300413",
       "title": "Guide Bracket",
@@ -44,9 +69,16 @@
       "orderable": true,
       "erpItemId": "ERP-12-2300413",
       "pdmFileId": "PDM-12-2300413",
-      "configuration": "Default"
+      "configuration": "Default",
+      "stockStatus": "In stock",
+      "availableQuantity": 23,
+      "leadTimeDays": 3,
+      "warehouse": "Main",
+      "viewerUrl": "/cad-viewer/#mesh=12-2300413"
     },
     {
+      "meshId": "12-1500544_Default<As Machined>",
+      "occurrenceId": "226022-00:004",
       "partNumber": "12-1500544_Default<As Machined>",
       "sku": "12-1500544",
       "title": "Machined Spacer",
@@ -59,9 +91,16 @@
       "orderable": true,
       "erpItemId": "ERP-12-1500544",
       "pdmFileId": "PDM-12-1500544",
-      "configuration": "As Machined"
+      "configuration": "As Machined",
+      "stockStatus": "Low stock",
+      "availableQuantity": 5,
+      "leadTimeDays": 5,
+      "warehouse": "Main",
+      "viewerUrl": "/cad-viewer/#mesh=12-1500544_Default%3CAs%20Machined%3E"
     },
     {
+      "meshId": "02-1301161",
+      "occurrenceId": "226022-00:005",
       "partNumber": "02-1301161",
       "sku": "02-1301161",
       "title": "Socket Head Cap Screw",
@@ -74,9 +113,16 @@
       "orderable": true,
       "erpItemId": "ERP-02-1301161",
       "pdmFileId": "PDM-02-1301161",
-      "configuration": "Default"
+      "configuration": "Default",
+      "stockStatus": "In stock",
+      "availableQuantity": 420,
+      "leadTimeDays": 1,
+      "warehouse": "Main",
+      "viewerUrl": "/cad-viewer/#mesh=02-1301161"
     },
     {
+      "meshId": "02-0400188",
+      "occurrenceId": "226022-00:006",
       "partNumber": "02-0400188",
       "sku": "02-0400188",
       "title": "Flat Washer",
@@ -89,9 +135,16 @@
       "orderable": true,
       "erpItemId": "ERP-02-0400188",
       "pdmFileId": "PDM-02-0400188",
-      "configuration": "Default"
+      "configuration": "Default",
+      "stockStatus": "In stock",
+      "availableQuantity": 960,
+      "leadTimeDays": 1,
+      "warehouse": "Main",
+      "viewerUrl": "/cad-viewer/#mesh=02-0400188"
     },
     {
+      "meshId": "02-1900390",
+      "occurrenceId": "226022-00:007",
       "partNumber": "02-1900390",
       "sku": "02-1900390",
       "title": "Dowel Pin",
@@ -104,9 +157,16 @@
       "orderable": true,
       "erpItemId": "ERP-02-1900390",
       "pdmFileId": "PDM-02-1900390",
-      "configuration": "Default"
+      "configuration": "Default",
+      "stockStatus": "In stock",
+      "availableQuantity": 76,
+      "leadTimeDays": 2,
+      "warehouse": "Main",
+      "viewerUrl": "/cad-viewer/#mesh=02-1900390"
     },
     {
+      "meshId": "02-2000826",
+      "occurrenceId": "226022-00:008",
       "partNumber": "02-2000826",
       "sku": "02-2000826",
       "title": "Shoulder Screw",
@@ -119,9 +179,16 @@
       "orderable": true,
       "erpItemId": "ERP-02-2000826",
       "pdmFileId": "PDM-02-2000826",
-      "configuration": "Default"
+      "configuration": "Default",
+      "stockStatus": "In stock",
+      "availableQuantity": 64,
+      "leadTimeDays": 2,
+      "warehouse": "Main",
+      "viewerUrl": "/cad-viewer/#mesh=02-2000826"
     },
     {
+      "meshId": "01-1902147",
+      "occurrenceId": "226022-00:009",
       "partNumber": "01-1902147",
       "sku": "01-1902147",
       "title": "Side Cover",
@@ -134,9 +201,16 @@
       "orderable": true,
       "erpItemId": "ERP-01-1902147",
       "pdmFileId": "PDM-01-1902147",
-      "configuration": "Default"
+      "configuration": "Default",
+      "stockStatus": "Build to order",
+      "availableQuantity": 0,
+      "leadTimeDays": 12,
+      "warehouse": "Machine Shop",
+      "viewerUrl": "/cad-viewer/#mesh=01-1902147"
     },
     {
+      "meshId": "12-1602868",
+      "occurrenceId": "226022-00:010",
       "partNumber": "12-1602868",
       "sku": "12-1602868",
       "title": "Bearing Block",
@@ -149,9 +223,16 @@
       "orderable": true,
       "erpItemId": "ERP-12-1602868",
       "pdmFileId": "PDM-12-1602868",
-      "configuration": "Default"
+      "configuration": "Default",
+      "stockStatus": "Low stock",
+      "availableQuantity": 8,
+      "leadTimeDays": 6,
+      "warehouse": "Main",
+      "viewerUrl": "/cad-viewer/#mesh=12-1602868"
     },
     {
+      "meshId": "02-1400674",
+      "occurrenceId": "226022-00:011",
       "partNumber": "02-1400674",
       "sku": "02-1400674",
       "title": "Retaining Ring",
@@ -164,9 +245,16 @@
       "orderable": true,
       "erpItemId": "ERP-02-1400674",
       "pdmFileId": "PDM-02-1400674",
-      "configuration": "Default"
+      "configuration": "Default",
+      "stockStatus": "In stock",
+      "availableQuantity": 180,
+      "leadTimeDays": 1,
+      "warehouse": "Main",
+      "viewerUrl": "/cad-viewer/#mesh=02-1400674"
     },
     {
+      "meshId": "05-1500006",
+      "occurrenceId": "226022-00:012",
       "partNumber": "05-1500006",
       "sku": "05-1500006",
       "title": "Pneumatic Fitting",
@@ -179,9 +267,16 @@
       "orderable": true,
       "erpItemId": "ERP-05-1500006",
       "pdmFileId": "PDM-05-1500006",
-      "configuration": "Default"
+      "configuration": "Default",
+      "stockStatus": "In stock",
+      "availableQuantity": 34,
+      "leadTimeDays": 2,
+      "warehouse": "Main",
+      "viewerUrl": "/cad-viewer/#mesh=05-1500006"
     },
     {
+      "meshId": "01-1900022",
+      "occurrenceId": "226022-00:013",
       "partNumber": "01-1900022",
       "sku": "01-1900022",
       "title": "End Plate",
@@ -194,9 +289,16 @@
       "orderable": true,
       "erpItemId": "ERP-01-1900022",
       "pdmFileId": "PDM-01-1900022",
-      "configuration": "Default"
+      "configuration": "Default",
+      "stockStatus": "Build to order",
+      "availableQuantity": 0,
+      "leadTimeDays": 10,
+      "warehouse": "Machine Shop",
+      "viewerUrl": "/cad-viewer/#mesh=01-1900022"
     },
     {
+      "meshId": "01-1902146",
+      "occurrenceId": "226022-00:014",
       "partNumber": "01-1902146",
       "sku": "01-1902146",
       "title": "Guard Plate",
@@ -209,9 +311,16 @@
       "orderable": true,
       "erpItemId": "ERP-01-1902146",
       "pdmFileId": "PDM-01-1902146",
-      "configuration": "Default"
+      "configuration": "Default",
+      "stockStatus": "Low stock",
+      "availableQuantity": 4,
+      "leadTimeDays": 7,
+      "warehouse": "Main",
+      "viewerUrl": "/cad-viewer/#mesh=01-1902146"
     },
     {
+      "meshId": "08-1601061",
+      "occurrenceId": "226022-00:015",
       "partNumber": "08-1601061",
       "sku": "08-1601061",
       "title": "Sensor Bracket",
@@ -224,9 +333,16 @@
       "orderable": true,
       "erpItemId": "ERP-08-1601061",
       "pdmFileId": "PDM-08-1601061",
-      "configuration": "Default"
+      "configuration": "Default",
+      "stockStatus": "In stock",
+      "availableQuantity": 18,
+      "leadTimeDays": 3,
+      "warehouse": "Main",
+      "viewerUrl": "/cad-viewer/#mesh=08-1601061"
     },
     {
+      "meshId": "12-2300411",
+      "occurrenceId": "226022-00:016",
       "partNumber": "12-2300411",
       "sku": "12-2300411",
       "title": "Guide Rail Clamp",
@@ -239,9 +355,16 @@
       "orderable": true,
       "erpItemId": "ERP-12-2300411",
       "pdmFileId": "PDM-12-2300411",
-      "configuration": "Default"
+      "configuration": "Default",
+      "stockStatus": "In stock",
+      "availableQuantity": 22,
+      "leadTimeDays": 3,
+      "warehouse": "Main",
+      "viewerUrl": "/cad-viewer/#mesh=12-2300411"
     },
     {
+      "meshId": "14-2100080",
+      "occurrenceId": "226022-00:017",
       "partNumber": "14-2100080",
       "sku": "14-2100080",
       "title": "Mounting Block",
@@ -254,9 +377,16 @@
       "orderable": true,
       "erpItemId": "ERP-14-2100080",
       "pdmFileId": "PDM-14-2100080",
-      "configuration": "Default"
+      "configuration": "Default",
+      "stockStatus": "Build to order",
+      "availableQuantity": 0,
+      "leadTimeDays": 14,
+      "warehouse": "Machine Shop",
+      "viewerUrl": "/cad-viewer/#mesh=14-2100080"
     },
     {
+      "meshId": "01-1600055",
+      "occurrenceId": "226022-00:018",
       "partNumber": "01-1600055",
       "sku": "01-1600055",
       "title": "Service Cover Plate",
@@ -269,9 +399,16 @@
       "orderable": true,
       "erpItemId": "ERP-01-1600055",
       "pdmFileId": "PDM-01-1600055",
-      "configuration": "Default"
+      "configuration": "Default",
+      "stockStatus": "In stock",
+      "availableQuantity": 11,
+      "leadTimeDays": 3,
+      "warehouse": "Main",
+      "viewerUrl": "/cad-viewer/#mesh=01-1600055"
     },
     {
+      "meshId": "133-100-03-2/133-1010-03-2/133-1011-03-1/12-2600649-1",
+      "occurrenceId": "226022-00:019",
       "partNumber": "133-100-03-2/133-1010-03-2/133-1011-03-1/12-2600649-1",
       "sku": "12-2600649-1",
       "title": "Service Replacement Part",
@@ -284,9 +421,16 @@
       "orderable": true,
       "erpItemId": "ERP-12-2600649-1",
       "pdmFileId": "PDM-12-2600649-1",
-      "configuration": "Default"
+      "configuration": "Default",
+      "stockStatus": "Build to order",
+      "availableQuantity": 0,
+      "leadTimeDays": 14,
+      "warehouse": "Machine Shop",
+      "viewerUrl": "/cad-viewer/#mesh=133-100-03-2%2F133-1010-03-2%2F133-1011-03-1%2F12-2600649-1"
     },
     {
+      "meshId": "01-1100015_90",
+      "occurrenceId": "226022-00:020",
       "partNumber": "01-1100015_90",
       "sku": "01-1100015",
       "title": "Base Frame Weldment",
@@ -299,7 +443,12 @@
       "orderable": false,
       "erpItemId": "ERP-01-1100015",
       "pdmFileId": "PDM-01-1100015",
-      "configuration": "90 Degree"
+      "configuration": "90 Degree",
+      "stockStatus": "Inventory unknown",
+      "availableQuantity": null,
+      "leadTimeDays": null,
+      "warehouse": null,
+      "viewerUrl": "/cad-viewer/#mesh=01-1100015_90"
     }
   ]
 }
