@@ -1,0 +1,20 @@
+{
+  "name": "c3-cad-viewer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "links:generate": "node scripts/generate-viewer-links.js",
+    "catalog:scan": "node scripts/scan-shared-project-catalog.js",
+    "db:migrate": "node scripts/migrate.js",
+    "db:seed": "node scripts/seed-viewer-links.js",
+    "db:import-json": "node scripts/import-json-to-postgres.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "pg": "^8.12.0"
+  }
+}

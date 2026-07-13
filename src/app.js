@@ -4,20 +4,31 @@ import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { MeshoptDecoder } from "three/addons/libs/meshopt_decoder.module.js";
 
-const MODEL_URLS = [
+let MODEL_URLS = [
   "./models/226022-00_COMP.glb?v=20260617-comp",
   "./models/226022-00.glb?v=20260612-fallback",
 ];
-const DATA_ENDPOINTS = {
+let DATA_ENDPOINTS = {
   catalog: "./mock-api/catalog.json",
   inventory: "./mock-api/inventory.json",
   orderRequest: "./mock-api/order-request.json",
 };
+let viewerContext = {
+  project: { number: "226022" },
+  model: { name: "226022-00" },
+};
+const viewerContextEndpoint = window.CAD_VIEWER_CONTEXT_ENDPOINT || "api/viewer-context";
 
 const viewer = document.querySelector("#viewer");
 const drawer = document.querySelector("#drawer");
 const resetButton = document.querySelector("#reset-view");
+let viewerStatusBar = null;
+let viewerStatusText = null;
+let viewerStatusMeta = null;
+let viewerStatusProgress = null;
 let basketButton = null;
+let hiddenPartsButton = null;
+let viewerHint = null;
 let checkoutPage = null;
 
 const scene = new THREE.Scene();
@@ -53,19 +64,29 @@ const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
 const pickableMeshes = [];
 const originalMaterials = new Map();
+const hiddenMeshes = new Set();
 let selectedMesh = null;
 let needsRender = true;
 let partData = {
   catalogByPartNumber: new Map(),
+  catalogByAlias: new Map(),
   inventoryBySku: new Map(),
   sources: [],
 };
 const collectionItems = [];
+const c3PartNumberPattern = /(?:^|[^a-z0-9])((?:01|02|05|08|12|13|14|15|16)-\d{7})(?!\d)/i;
 
 init();
 
 async function init() {
+  setupViewerStatusBar();
   setupBasketUi();
+  updateViewerStatus({
+    label: "Preparing 3D assembly",
+    detail: "Initializing viewer",
+    progress: 4,
+    state: "loading",
+  });
   showModelSkeleton("Preparing 3D assembly");
   renderDrawerSkeleton();
   resize();
@@ -75,17 +96,25 @@ async function init() {
   });
   window.addEventListener("hashchange", syncRoute);
   renderer.domElement.addEventListener("pointerdown", handlePick);
+  renderer.domElement.addEventListener("contextmenu", handleHidePart);
   resetButton?.addEventListener("click", () => {
     frameScene();
     requestRender();
   });
 
   try {
+    viewerContext = await loadViewerContext();
     partData = await loadPartData();
     await loadModel();
     if (!selectedMesh) renderEmptyDrawer();
   } catch (error) {
     console.error("Unable to initialize the viewer.", error);
+    updateViewerStatus({
+      label: "Unable to load CAD model",
+      detail: error.message,
+      progress: 100,
+      state: "error",
+    });
     showMessage(`Unable to load viewer data: ${error.message}`);
     renderDrawerError(error);
   }
@@ -94,25 +123,85 @@ async function init() {
   animate();
 }
 
+async function loadViewerContext() {
+  const queryHash = new URLSearchParams(window.location.search).get("q")?.trim();
+  if (!queryHash) return viewerContext;
+
+  showModelSkeleton("Resolving project model");
+  updateViewerStatus({
+    label: "Resolving project model",
+    detail: "Looking up viewer context",
+    progress: 8,
+    state: "loading",
+  });
+
+  const context = await fetchJson(`${viewerContextEndpoint}?q=${encodeURIComponent(queryHash)}`);
+  if (!context?.model?.url) {
+    throw new Error("Viewer context did not include a model URL.");
+  }
+
+  MODEL_URLS = [context.model.url];
+  DATA_ENDPOINTS = {
+    ...DATA_ENDPOINTS,
+    ...(context.dataEndpoints || {}),
+  };
+
+  return context;
+}
+
 function requestRender() {
   needsRender = true;
 }
 
 async function loadPartData() {
+  updateViewerStatus({
+    label: "Loading part catalog",
+    detail: "Reading EASM metadata and inventory",
+    progress: 16,
+    state: "loading",
+  });
   const [catalog, inventory] = await Promise.all([
     fetchJson(DATA_ENDPOINTS.catalog),
     fetchJson(DATA_ENDPOINTS.inventory),
   ]);
+  const parts = catalog.parts || [];
 
   return {
-    catalogByPartNumber: new Map(
-      (catalog.parts || []).map((part) => [part.partNumber, part])
-    ),
+    catalogByPartNumber: new Map(parts.map((part) => [part.partNumber, part])),
+    catalogByAlias: buildCatalogAliasMap(parts),
     inventoryBySku: new Map(
       (inventory.locations || []).map((item) => [item.sku, item])
     ),
     sources: [catalog.source, inventory.source].filter(Boolean),
   };
+}
+
+function buildCatalogAliasMap(parts) {
+  const aliases = new Map();
+
+  for (const part of parts) {
+    for (const alias of getCatalogAliases(part)) {
+      aliases.set(alias, part);
+    }
+  }
+
+  return aliases;
+}
+
+function getCatalogAliases(part) {
+  const occurrenceAliases = (part.occurrences || []).flatMap((occurrence) => [
+    occurrence.name,
+    occurrence.displayName,
+    occurrence.path,
+  ]);
+
+  return [
+    part.partNumber,
+    part.sku,
+    part.erpItemId,
+    ...(part.aliases || []),
+    ...occurrenceAliases,
+  ].flatMap(getPartCandidates);
 }
 
 async function fetchJson(url) {
@@ -123,13 +212,21 @@ async function fetchJson(url) {
 
 async function loadModel() {
   showModelSkeleton("Loading 3D assembly");
+  updateViewerStatus({
+    label: "Loading 3D model",
+    detail: viewerContext.model?.fileName || viewerContext.model?.name || "CAD model",
+    progress: 22,
+    state: "loading",
+  });
 
   try {
     const gltf = await loadFirstAvailableModel();
     const model = gltf.scene;
+    let meshCount = 0;
 
     model.traverse((node) => {
       if (!node.isMesh) return;
+      meshCount += 1;
 
       node.castShadow = true;
       node.receiveShadow = true;
@@ -141,6 +238,12 @@ async function loadModel() {
     clearMessage();
     frameScene();
     requestRender();
+    updateViewerStatus({
+      label: "Model ready",
+      detail: getLoadedModelStatus(meshCount),
+      progress: 100,
+      state: "ready",
+    });
   } catch (error) {
     console.error("Unable to load the 3D model.", error);
     showMessage(`Unable to load the 3D model: ${error.message}`);
@@ -160,7 +263,7 @@ async function loadFirstAvailableModel() {
       const loader = new GLTFLoader();
       loader.setDRACOLoader(dracoLoader);
       loader.setMeshoptDecoder(MeshoptDecoder);
-      return await loader.loadAsync(url);
+      return await loadModelWithProgress(loader, url);
     } catch (error) {
       errors.push(`${url}: ${error.message}`);
       console.warn(`Model load failed for ${url}`, error);
@@ -170,7 +273,53 @@ async function loadFirstAvailableModel() {
   throw new Error(errors.join("; "));
 }
 
+function loadModelWithProgress(loader, url) {
+  return new Promise((resolve, reject) => {
+    loader.load(
+      url,
+      resolve,
+      (event) => {
+        const percent = getLoadPercent(event);
+        updateViewerStatus({
+          label: "Loading 3D model",
+          detail: percent == null ? "Downloading model geometry" : `${formatBytes(event.loaded)} of ${formatBytes(event.total)}`,
+          progress: percent == null ? 34 : 22 + percent * 0.7,
+          state: "loading",
+        });
+      },
+      reject
+    );
+  });
+}
+
+function getLoadPercent(event) {
+  if (!event?.total) return null;
+  return Math.max(0, Math.min(100, Math.round((event.loaded / event.total) * 100)));
+}
+
+function formatBytes(bytes) {
+  const value = Number(bytes || 0);
+  if (value >= 1024 * 1024) return `${(value / 1024 / 1024).toFixed(1)} MB`;
+  if (value >= 1024) return `${(value / 1024).toFixed(1)} KB`;
+  return `${value} B`;
+}
+
+function getLoadedModelStatus(meshCount) {
+  const projectNumber = viewerContext.project?.number || "Unknown project";
+  const modelName =
+    viewerContext.model?.fileName || viewerContext.model?.name || "CAD model";
+  const catalogCount = partData.catalogByPartNumber?.size || 0;
+  const catalogMessage = catalogCount
+    ? `${catalogCount} catalog parts available`
+    : "No EASM catalog metadata found";
+
+  return `${projectNumber} • ${modelName} • ${meshCount} selectable meshes • ${catalogMessage}`;
+}
+
 function getPartKey(mesh) {
+  const hierarchyPartNumber = getHierarchyPartNumber(mesh);
+  if (hierarchyPartNumber) return hierarchyPartNumber;
+
   return (
     mesh.userData.partNumber ||
     mesh.userData.name ||
@@ -180,19 +329,71 @@ function getPartKey(mesh) {
   );
 }
 
+function getHierarchyPartNumber(object) {
+  let current = object;
+
+  while (current) {
+    const partNumber =
+      getC3PartNumber(current.userData?.partNumber) ||
+      getC3PartNumber(current.userData?.name) ||
+      getC3PartNumber(current.name);
+
+    if (partNumber) return partNumber;
+    current = current.parent;
+  }
+
+  return "";
+}
+
+function getC3PartNumber(value) {
+  return String(value || "").match(c3PartNumberPattern)?.[1]?.toUpperCase() || "";
+}
+
 function handlePick(event) {
+  if (event.button !== 0) return;
+  const mesh = getMeshFromPointer(event);
+  if (!mesh) return;
+
+  selectMesh(mesh);
+}
+
+function handleHidePart(event) {
+  event.preventDefault();
+
+  const mesh = getMeshFromPointer(event);
+  if (!mesh) {
+    showViewerHint("No part under cursor");
+    return;
+  }
+
+  hideMesh(mesh);
+}
+
+function getMeshFromPointer(event) {
   const rect = renderer.domElement.getBoundingClientRect();
   pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
   pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
   raycaster.setFromCamera(pointer, camera);
-  const hit = raycaster.intersectObjects(scene.children, true)[0];
-  if (!hit) return;
+  const hit = raycaster
+    .intersectObjects(scene.children, true)
+    .find((intersection) => isPickableIntersection(intersection.object));
+  if (!hit) return null;
 
-  const mesh = findPickableMesh(hit.object);
-  if (!mesh) return;
+  return findPickableMesh(hit.object);
+}
 
-  selectMesh(mesh);
+function isPickableIntersection(object) {
+  const mesh = findPickableMesh(object);
+  if (!mesh || hiddenMeshes.has(mesh) || !mesh.visible) return false;
+
+  let current = mesh.parent;
+  while (current) {
+    if (!current.visible) return false;
+    current = current.parent;
+  }
+
+  return true;
 }
 
 function findPickableMesh(object) {
@@ -218,12 +419,51 @@ function selectMesh(mesh) {
   originalMaterials.set(mesh, mesh.material);
   mesh.material = mesh.material.clone();
 
+  if ("color" in mesh.material) {
+    mesh.material.color = new THREE.Color(0xff2a2a);
+  }
+
   if ("emissive" in mesh.material) {
-    mesh.material.emissive = new THREE.Color(0x1a8fbb);
-    mesh.material.emissiveIntensity = 0.28;
+    mesh.material.emissive = new THREE.Color(0xff1f1f);
+    mesh.material.emissiveIntensity = 0.45;
   }
 
   renderDrawer(mesh.userData.partNumber);
+  requestRender();
+}
+
+function hideMesh(mesh) {
+  if (selectedMesh === mesh) {
+    restoreSelectedMaterial();
+    selectedMesh = null;
+    renderEmptyDrawer();
+  }
+
+  mesh.visible = false;
+  hiddenMeshes.add(mesh);
+  renderHiddenPartsButton();
+  showViewerHint(`Hidden: ${getShortPartName(mesh.userData.partNumber)}`);
+  requestRender();
+}
+
+function restoreHiddenMeshes() {
+  hiddenMeshes.forEach((mesh) => {
+    mesh.visible = true;
+  });
+  hiddenMeshes.clear();
+  renderHiddenPartsButton();
+  showViewerHint("Hidden parts restored");
+  requestRender();
+}
+
+function restoreSelectedMaterial() {
+  if (!selectedMesh || !originalMaterials.has(selectedMesh)) return;
+  selectedMesh.material = originalMaterials.get(selectedMesh);
+}
+
+function getShortPartName(partNumber) {
+  const candidates = getPartCandidates(partNumber);
+  return candidates.at(-1) || partNumber || "part";
 }
 
 function renderDrawerSkeleton() {
@@ -261,7 +501,7 @@ function renderEmptyDrawer() {
       </div>
       <p class="eyebrow">Part Details</p>
       <h2>Select a part</h2>
-      <p>Click any component in the assembly to view part information and collect parts for a quote or order request.</p>
+      <p>Click any component in the assembly to view part information and collect parts for a quote request.</p>
       <div class="empty-hints" aria-hidden="true">
         <span></span>
         <span></span>
@@ -300,10 +540,7 @@ function renderDrawer(partNumber) {
 
       <div class="detail-list">
         ${detailRow("SKU / ERP item", catalog.sku || catalog.erpItemId)}
-        ${detailRow("Material", catalog.material)}
-        ${detailRow("Finish", catalog.finish)}
         ${detailRow("Revision", catalog.revision)}
-        ${detailRow("Quantity in assembly", catalog.quantityInAssembly)}
         ${detailRow("Available quantity", inventory?.availableQuantity)}
         ${detailRow("Lead time", inventory ? `${inventory.leadTimeDays} days` : null)}
         ${detailRow("Warehouse", inventory?.warehouse)}
@@ -341,6 +578,9 @@ function resolveCatalog(partNumber) {
     if (partData.catalogByPartNumber.has(candidate)) {
       return partData.catalogByPartNumber.get(candidate);
     }
+    if (partData.catalogByAlias.has(candidate)) {
+      return partData.catalogByAlias.get(candidate);
+    }
   }
 
   for (const catalog of partData.catalogByPartNumber.values()) {
@@ -365,23 +605,101 @@ function resolveCatalog(partNumber) {
 function getPartCandidates(partNumber) {
   const segments = String(partNumber).split("/");
   const last = segments.at(-1) || partNumber;
-  const withoutInstance = last.replace(/-\d+$/, "");
+  const beforeAt = last.split("@")[0] || last;
+  const withoutAngleInstance = beforeAt.replace(/<\d+>/g, "");
+  const withoutParenText = withoutAngleInstance.replace(/\([^)]*\)/g, "");
+  const withoutInstance =
+    (withoutParenText.match(/-/g) || []).length > 1
+      ? withoutParenText.replace(/-\d+$/, "")
+      : withoutParenText;
   const withoutConfig = withoutInstance.replace(/_.+$/, "");
-  return [...new Set([partNumber, last, withoutInstance, withoutConfig])];
+  const exactC3PartNumber = getC3PartNumber(partNumber);
+  const inferredPartNumber = withoutInstance.match(/\b(?:\d{2,6}|[A-Z]{2,}\d*)-\d{2,7}(?:-\d{1,4})?\b/i)?.[0];
+  return [
+    ...new Set(
+      [
+        exactC3PartNumber,
+        partNumber,
+        last,
+        beforeAt,
+        withoutAngleInstance,
+        withoutParenText,
+        withoutInstance,
+        withoutConfig,
+        inferredPartNumber,
+      ].filter(Boolean)
+    ),
+  ];
+}
+
+function setupViewerStatusBar() {
+  const workspace = document.querySelector(".workspace");
+  if (!workspace || viewerStatusBar) return;
+
+  viewerStatusBar = document.createElement("section");
+  viewerStatusBar.className = "viewer-status-bar is-loading";
+  viewerStatusBar.setAttribute("aria-label", "CAD model loading status");
+  viewerStatusBar.innerHTML = `
+    <div class="viewer-status-copy">
+      <strong id="viewer-status-label">Preparing 3D assembly</strong>
+      <span id="viewer-status-meta">Initializing viewer</span>
+    </div>
+    <div class="viewer-status-meter" aria-hidden="true">
+      <span id="viewer-status-progress"></span>
+    </div>
+  `;
+
+  viewer.after(viewerStatusBar);
+  viewerStatusText = viewerStatusBar.querySelector("#viewer-status-label");
+  viewerStatusMeta = viewerStatusBar.querySelector("#viewer-status-meta");
+  viewerStatusProgress = viewerStatusBar.querySelector("#viewer-status-progress");
+}
+
+function updateViewerStatus({ label, detail, progress, state = "loading" }) {
+  if (!viewerStatusBar) return;
+
+  if (label && viewerStatusText) viewerStatusText.textContent = label;
+  if (detail && viewerStatusMeta) viewerStatusMeta.textContent = detail;
+
+  const normalizedProgress = Math.max(0, Math.min(100, Number(progress) || 0));
+  if (viewerStatusProgress) {
+    viewerStatusProgress.style.width = `${normalizedProgress}%`;
+  }
+
+  viewerStatusBar.classList.toggle("is-loading", state === "loading");
+  viewerStatusBar.classList.toggle("is-ready", state === "ready");
+  viewerStatusBar.classList.toggle("is-error", state === "error");
 }
 
 function setupBasketUi() {
+  const viewerTools = document.createElement("div");
+  viewerTools.className = "viewer-tools";
+
   basketButton = document.createElement("a");
   basketButton.className = "basket-button";
   basketButton.href = "#basket";
   basketButton.textContent = "Collection";
-  document.querySelector(".workspace")?.appendChild(basketButton);
+  viewerTools.appendChild(basketButton);
+
+  hiddenPartsButton = document.createElement("button");
+  hiddenPartsButton.className = "hidden-parts-button";
+  hiddenPartsButton.type = "button";
+  hiddenPartsButton.addEventListener("click", restoreHiddenMeshes);
+  viewerTools.appendChild(hiddenPartsButton);
+
+  document.querySelector(".workspace")?.appendChild(viewerTools);
+
+  viewerHint = document.createElement("div");
+  viewerHint.className = "viewer-hint";
+  viewerHint.setAttribute("role", "status");
+  viewer.appendChild(viewerHint);
 
   checkoutPage = document.createElement("section");
   checkoutPage.className = "checkout-page";
   checkoutPage.setAttribute("aria-label", "Part collection and requests");
   document.body.appendChild(checkoutPage);
   renderBasketButton();
+  renderHiddenPartsButton();
   renderCheckoutPage();
 }
 
@@ -395,7 +713,7 @@ function addCollectionItem(catalog, inventory) {
   } else {
     collectionItems.push({
       key,
-      assemblyId: "226022-00",
+      assemblyId: viewerContext.model?.name || viewerContext.project?.number || "unknown",
       partNumber: catalog.partNumber,
       sku: catalog.sku,
       title: catalog.title || catalog.partNumber,
@@ -454,6 +772,28 @@ function renderBasketButton() {
   `;
 }
 
+function renderHiddenPartsButton() {
+  if (!hiddenPartsButton) return;
+
+  const count = hiddenMeshes.size;
+  hiddenPartsButton.hidden = count === 0;
+  hiddenPartsButton.innerHTML = `
+    <span>Show Hidden</span>
+    <strong>${escapeHtml(count)}</strong>
+  `;
+}
+
+function showViewerHint(message) {
+  if (!viewerHint) return;
+
+  viewerHint.textContent = message;
+  viewerHint.classList.add("is-visible");
+  window.clearTimeout(showViewerHint.timeoutId);
+  showViewerHint.timeoutId = window.setTimeout(() => {
+    viewerHint?.classList.remove("is-visible");
+  }, 1800);
+}
+
 function syncRoute() {
   const isBasket = window.location.hash === "#basket";
   document.body.classList.toggle("show-checkout", isBasket);
@@ -501,14 +841,11 @@ function renderCheckoutPage() {
                 <section class="quote-delivery">
                   <div>
                     <p class="eyebrow">Next Step</p>
-                    <h2>Request quote or place order</h2>
-                    <p>Quote requests can include a customer email. Order requests are submitted internally for database processing.</p>
+                    <h2>Request quote</h2>
+                    <p>Collected parts will be prepared for a HubSpot quote after portal setup is complete.</p>
                   </div>
-                  <label for="customer-email">Customer email</label>
-                  <div class="quote-email-row">
-                    <input id="customer-email" type="email" placeholder="customer@example.com" />
+                  <div class="quote-action-row">
                     <button id="request-quote" class="quote-button" type="button">Request Quote</button>
-                    <button id="request-order" class="order-button" type="button">Place Order Request</button>
                   </div>
                   <p id="request-status" class="order-note">Collected parts will be packaged with item details, quantities, availability, and lead times.</p>
                 </section>
@@ -522,7 +859,7 @@ function renderCheckoutPage() {
           : `
             <section class="empty-basket">
               <p class="eyebrow">No Lines Added</p>
-              <h2>Select parts in the CAD viewer, then collect them for quote or order.</h2>
+              <h2>Select parts in the CAD viewer, then collect them for quote.</h2>
               <a href="#" class="order-button">Return To Viewer</a>
             </section>
           `
@@ -532,10 +869,6 @@ function renderCheckoutPage() {
 
   checkoutPage.querySelector("#request-quote")?.addEventListener("click", () => {
     submitQuoteRequest();
-  });
-
-  checkoutPage.querySelector("#request-order")?.addEventListener("click", () => {
-    submitOrderRequest();
   });
 
   checkoutPage.querySelector("#clear-basket")?.addEventListener("click", () => {
@@ -561,18 +894,9 @@ function renderCheckoutPage() {
 }
 
 async function submitQuoteRequest() {
-  const emailInput = checkoutPage.querySelector("#customer-email");
   const status = checkoutPage.querySelector("#request-status");
   const button = checkoutPage.querySelector("#request-quote");
-  const customerEmail = emailInput?.value.trim();
-
-  if (!customerEmail || !emailInput.checkValidity()) {
-    setRequestStatus(status, "Enter a valid customer email before requesting a quote.", "error");
-    emailInput?.focus();
-    return;
-  }
-
-  const payload = createCollectionPayload("quote", { customerEmail });
+  const payload = createCollectionPayload("quote");
   setRequestLoading(button, true, "Submitting");
   setRequestStatus(status, "Submitting quote request...", "pending");
 
@@ -580,39 +904,10 @@ async function submitQuoteRequest() {
   console.info("quote request payload", payload);
   setRequestStatus(
     status,
-    `Quote request ${payload.requestNumber} submitted for ${customerEmail}.`,
+    `Quote request ${payload.requestNumber} prepared for HubSpot quote creation.`,
     "success"
   );
   setRequestLoading(button, false);
-}
-
-async function submitOrderRequest() {
-  const status = checkoutPage.querySelector("#request-status");
-  const button = checkoutPage.querySelector("#request-order");
-  const payload = createCollectionPayload("order");
-
-  setRequestLoading(button, true, "Submitting");
-  setRequestStatus(status, "Submitting order request...", "pending");
-
-  try {
-    const response = await fetchJson(DATA_ENDPOINTS.orderRequest);
-    console.info("mock order request payload", payload);
-    setRequestStatus(
-      status,
-      response.message ||
-        `Order request ${payload.requestNumber} submitted. Our team will be notified by email.`,
-      "success"
-    );
-  } catch (error) {
-    console.error("Unable to submit mock order request.", error);
-    setRequestStatus(
-      status,
-      "Unable to submit the mock order request. Please try again.",
-      "error"
-    );
-  } finally {
-    setRequestLoading(button, false);
-  }
 }
 
 function setRequestLoading(button, isLoading, label = "Submitting") {
@@ -639,11 +934,11 @@ function waitForMockResponse() {
   });
 }
 
-function createCollectionPayload(requestKind, options = {}) {
+function createCollectionPayload(requestKind) {
   return {
     requestKind,
-    assemblyId: "226022-00",
-    ...(options.customerEmail ? { customerEmail: options.customerEmail } : {}),
+    assemblyId: viewerContext.model?.name || viewerContext.project?.number || "unknown",
+    projectNumber: viewerContext.project?.number || null,
     requestNumber: createRequestNumber(requestKind),
     lines: collectionItems.map(toCheckoutLine),
   };
@@ -745,7 +1040,7 @@ function getCollectionNote(catalog, inventory, isCollected) {
   if (!inventory) return "No inventory record was returned for this SKU. It can still be reviewed by sales.";
   if (isCollected) return "This part is already in the collection. Add another if more than one is needed.";
 
-  return "Ready to collect. Pricing will be handled during quote or order review.";
+  return "Ready to collect. Pricing will be handled during quote review.";
 }
 
 function detailRow(label, value) {

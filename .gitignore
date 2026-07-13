@@ -1,0 +1,8 @@
+node_modules/
+.env
+.env.local
+npm-debug.log*
+cad-viewer.service
+data/
+!data/.gitkeep
+data/hubspot-webhook-events.jsonl
