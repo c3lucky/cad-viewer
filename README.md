@@ -107,6 +107,13 @@ http://127.0.0.1:8766/?q=eaa998ee3b7984773c5bf99d
 
 ## PostgreSQL Setup
 
+For the production cutover summary, validation results, rollback steps, and
+stabilization plan, see:
+
+```text
+POSTGRES_CUTOVER_NOTES.md
+```
+
 Create the schema:
 
 ```bash
